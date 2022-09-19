@@ -1,3 +1,5 @@
+// 2016 - 2104
+
 const canvasSketch = require("canvas-sketch");
 const { lerp } = require("canvas-sketch-util/math");
 const { value } = require("canvas-sketch-util/random");
@@ -5,14 +7,12 @@ const random = require("canvas-sketch-util/random");
 const palettes = require("nice-color-palettes");
 
 const { data } = require("./brisdata-daily");
-console.log("d", data);
 
 let future = Object.entries(data)
   .filter(([key, value]) => !!value.rcp45)
   .map(([key, value]) => [...value.rcp85]);
 
 future = future.slice(0, 50);
-console.log("future", future);
 
 const settings = {
     pixelsPerInch: 300,
@@ -49,7 +49,10 @@ const sketch = () => {
     var centerx = context.canvas.width / 2;
     var centery = context.canvas.height / 2
 
-    context.fillStyle = "white"; //random.pick(palette);
+    const maxHue = 70;     
+    const minHue = 0;   
+
+    context.fillStyle = `hsla(${minHue + (maxHue - 0.5*maxHue)}, 80%, 90%, 0.5)`    
     context.fillRect(0, 0, width, height);
 
     // context.clearRect(0, 0, width, 300);
@@ -59,12 +62,10 @@ const sketch = () => {
     
     for (i = 0; i < normalised.length; i++) {
         angle = 0.1 * i;
-        x = centerx + (a + b * angle) * Math.cos(angle) //+ random.noise1D(normalised[i], 0.9, 25);
-        y = centery + (a + b * angle) * Math.sin(angle) //+ random.noise1D(normalised[i], 0.9, 25);
+        x = centerx + (a + b * angle) * Math.cos(angle) //+ random.noise1D(normalised[i], 10, 2);
+        y = centery + (a + b * angle) * Math.sin(angle) //+ random.noise1D(normalised[i], 10, 2);
 
-        const maxHue = 60;     
-        const minHue = 0;   
-        context.fillStyle = `hsla(${minHue + (maxHue - normalised[i]*maxHue)}, 90%, 50%, ${normalised[i]})`;
+        context.fillStyle = `hsla(${minHue + (maxHue - normalised[i]*(maxHue - minHue))}, 90%, 50%, ${normalised[i]})`;
         
         context.beginPath();
         console.log(normalised[i]);        
@@ -72,9 +73,9 @@ const sketch = () => {
         scale =  0.05 * Math.log((i*i)/200000+1)
 
         maxRadius = 32;
-        minRadius = 2;
+        minRadius = 1.25;
 
-        const radius = Math.max(Math.min(radiusBase * scale * (normalised[i] * 2), maxRadius ), minRadius);
+        const radius = radiusBase * scale * Math.max(Math.min((normalised[i] * 2), maxRadius ), minRadius);
 
          
         context.arc(x, y, radius , 0, 2*Math.PI)
